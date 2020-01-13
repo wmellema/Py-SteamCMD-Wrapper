@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="py-steamcmd-wrapper-WMELLEMA", # Replace with your own username
+    name="py-steamcmd-wrapper", # Replace with your own username
     version="0.0.1",
     author="Wouter Mellema",
     author_email="info@woutermellema.nl",

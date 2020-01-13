@@ -32,10 +32,12 @@ pacman -S lib32-gcc-libs
 
 ### Installing
 
-Download the Py-SteamCMD-Wrapper library from github and place the pysteamcmdwrapper folder inside your project.
-> Pip package comming soon!
+Run the following command to install the package
+```bash
+pip install py-steamcmd-wrapper
+```
 
-In order to install steam you have to do the following:
+In order to install steam using this wrapper you'll have to do the following:
 ``` python
 from pysteamcmdwrapper import SteamCMD
 
@@ -90,6 +92,8 @@ for key in os.listdir(keydir):
 ```
 
 > This snippet can be used with another project of mine. This will be coming soon!
+
+The login function is only needed when a subscription to the game is needed. The wrapper uses the 'Anonymous' user by default
 
 ## Contributing
 
