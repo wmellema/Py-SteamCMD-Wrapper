@@ -40,6 +40,13 @@ class SteamCMDDownloadException(SteamCMDException):
     def __init__(self,*args,**kwargs):
         super(SteamCMDDownloadException,self).__init__(*args,**kwargs)
 
+class SteamCMDInstallException(SteamCMDException):
+    """
+    Class for handeling installation exceptions
+    """
+    def __init__(self,*args,**kwargs):
+        super(SteamCMDInstallException,self).__init__(*args,**kwargs)
+
 class SteamCMD():
     """
     Wrapper for SteamCMD
@@ -148,7 +155,8 @@ class SteamCMD():
                 "It should be fine nevertheless")
                 return
             else:
-                raise e
+                raise SteamCMDInstallException("Failed to install, check error code {}".format(e.returncode))
+
         return
 
     def login(self,uname=None,passw=None):
