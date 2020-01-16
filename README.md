@@ -1,4 +1,7 @@
 # Py-SteamCMD-Wrapper
+![coverage](https://img.shields.io/badge/coverage-68%25-yellowgreen)
+[![HitCount](http://hits.dwyl.com/wmellema/Py-SteamCMD-Wrapper.svg)](http://hits.dwyl.com/wmellema/Py-SteamCMD-Wrapper)
+
 
 During the setup of game servers it can be infuriating to use SteamCMD due to some particularities within the SteamCMD Toolkit. This simple wrapper for python will handle everything from installation to downloading games.
 

@@ -55,13 +55,13 @@ class SteamCMD():
 
     _installation_path = ""
     _uname = "anonymous"
-    _passw = None
+    _passw = ""
 
     def __init__(self,installation_path):
         self._installation_path = installation_path
 
         if not os.path.isdir(self._installation_path):
-            raise SteamCMDException("No valid directory found at {}. Please make sure that the directory is correct.".format(self.installation_path))
+            raise SteamCMDInstallException("No valid directory found at {}. Please make sure that the directory is correct.".format(self._installation_path))
 
         self._prepare_installation()
 
@@ -182,7 +182,7 @@ class SteamCMD():
         except subprocess.CalledProcessError:
             raise SteamCMDException("Steamcmd was unable to run.")
 
-    def app_update(self, app_id, install_dir = None, validate = False):
+    def app_update(self, app_id, install_dir = None, validate = None):
         """
         Installer function for apps.
 
@@ -191,9 +191,10 @@ class SteamCMD():
         :param validate: Optional parameter for validation. Turn this on when redownloading something
         :return: Status code of child process
         """
-
-        _validate = 'validate' if validate else None
-        _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else None
+        # TODO: Validate seems to be broken. Check why
+        # TODO: Note: Non validated downloads will sometimes return error code 8. Just leave validate on?
+        _validate = 'validate' if validate else ""
+        _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else ""
 
         params = (
             self.exe,
@@ -203,10 +204,11 @@ class SteamCMD():
             "{}".format(_validate),
             "+quit",
         )
+        self._print_log("Parameters used:"," ".join(e for e in params if e))
         self._print_log("Downloading item {}".format(app_id),"into {} with validate set to {}".format(_install_dir,validate))
         try:
 
-            return subprocess.check_call(params)
+            return subprocess.check_call(" ".join(e for e in params if e))
         except subprocess.CalledProcessError as e:
             self._print_log(e)
             raise SteamCMDException("Steamcmd was unable to run.")
@@ -225,11 +227,12 @@ class SteamCMD():
 
         :return: Status code of child process
         """
-
+        # TODO: Validate seems to be broken. Check why
+        # TODO: Note: Non validated downloads will sometimes return error code 8. Just leave validate on?
         if n_tries == 0:
             raise SteamCMDDownloadException("Error downloading file, max number of timeout tries exceeded! Consider increasing the n_tries parameter if the download is particularly large")
-        _validate = 'validate' if validate else None
-        _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else None
+        _validate = 'validate' if validate else ""
+        _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else ""
 
         params = (
             self.exe,
@@ -239,9 +242,10 @@ class SteamCMD():
             "{}".format(_validate),
             "+quit",
         )
+        self._print_log("Parameters used:"," ".join(e for e in params if e))
         self._print_log("Downloading {}".format(workshop_id),"On try {}".format(n_tries))
         try:
-            return subprocess.check_call(params)
+            return subprocess.check_call(" ".join(e for e in params if e))
 
         except subprocess.CalledProcessError as e:
             # SteamCMD has a habit of timing out large downloads, so if the
