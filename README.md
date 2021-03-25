@@ -61,7 +61,7 @@ If your game needs a valid subscription (AKA you've bought the game) the login f
 A small code snippet to install an Arma III dedicated server with CBA_A3 installed
 ```python
 import os
-from pysteamcmdwrapper import SteamCMD
+from pysteamcmdwrapper import SteamCMD, SteamCMDException
 
 SERVER_DIR = "armaserver"
 WORKSHOP_DIR = os.path.join(os.getcwd(),"armamods","steamapps","workshop","content","107410")
