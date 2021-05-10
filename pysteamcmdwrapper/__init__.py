@@ -216,7 +216,7 @@ class SteamCMD():
         except subprocess.CalledProcessError:
             raise SteamCMDException("Steamcmd was unable to run.")
 
-    def app_update(self, app_id, install_dir=None, validate=None):
+    def app_update(self, app_id, install_dir=None, validate=None, beta=None):
         """
         Installer function for apps.
 
@@ -224,18 +224,21 @@ class SteamCMD():
         :param install_dir: Optional custom installation directory.
         :param validate: Optional parameter for validation. Turn this on
         when redownloading something
+        :param beta: Optional parameter for running a beta branch.
         :return: Status code of child process
         """
         # TODO: Validate seems to be broken. Check why
         # TODO: Note: Non validated downloads will sometimes return error code 8. Just leave validate on?
         _validate = 'validate' if validate else ""
         _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else ""
+        _beta = '-beta {}'.format(beta) if beta else ""
 
         params = (
             self.exe,
             "+login {} {}".format(self._uname, self._passw),
             "{}".format(_install_dir),
             "+app_update {}".format(app_id),
+            "{}".format(_beta),
             "{}".format(_validate),
             "+quit",
         )
