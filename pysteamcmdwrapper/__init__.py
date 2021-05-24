@@ -225,7 +225,7 @@ class SteamCMD():
         :param validate: Optional parameter for validation. Turn this on
         when redownloading something
         :param beta: Optional parameter for running a beta branch.
-        :param beta: Optional parameter for entering beta password.
+        :param betapassword: Optional parameter for entering beta password.
         :return: Status code of child process
         """
         # TODO: Validate seems to be broken. Check why
