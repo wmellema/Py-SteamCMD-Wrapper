@@ -216,7 +216,7 @@ class SteamCMD():
         except subprocess.CalledProcessError:
             raise SteamCMDException("Steamcmd was unable to run.")
 
-    def app_update(self, app_id, install_dir=None, validate=None, beta=None):
+    def app_update(self, app_id, install_dir=None, validate=None, beta=None, betapassword=None):
         """
         Installer function for apps.
 
@@ -225,6 +225,7 @@ class SteamCMD():
         :param validate: Optional parameter for validation. Turn this on
         when redownloading something
         :param beta: Optional parameter for running a beta branch.
+        :param beta: Optional parameter for entering beta password.
         :return: Status code of child process
         """
         # TODO: Validate seems to be broken. Check why
@@ -232,6 +233,7 @@ class SteamCMD():
         _validate = 'validate' if validate else ""
         _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else ""
         _beta = '-beta {}'.format(beta) if beta else ""
+        _betapassword = '-betapassword {}'.format(betapassword) if betapassword else ""
 
         params = (
             self.exe,
@@ -239,6 +241,7 @@ class SteamCMD():
             "{}".format(_install_dir),
             "+app_update {}".format(app_id),
             "{}".format(_beta),
+            "{}".format(_betapassword),
             "{}".format(_validate),
             "+quit",
         )
