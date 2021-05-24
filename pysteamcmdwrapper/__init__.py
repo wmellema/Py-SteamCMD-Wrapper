@@ -289,7 +289,7 @@ class SteamCMD():
         try:
             return subprocess.check_call(" ".join(e for e in params if e), shell=True)
 
-                except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError as e:
             # SteamCMD has a habit of timing out large downloads, so if the
             # Validate flag is set, retry on timeout for the remainder of
             # n_tries.
