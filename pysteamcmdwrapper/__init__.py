@@ -289,22 +289,39 @@ class SteamCMD():
         try:
             return subprocess.check_call(" ".join(e for e in params if e), shell=True)
 
-        except subprocess.CalledProcessError as e:
+                except subprocess.CalledProcessError as e:
             # SteamCMD has a habit of timing out large downloads, so if the
             # Validate flag is set, retry on timeout for the remainder of
             # n_tries.
             if e.returncode == 10 and _validate:
-                self._print_log("Download timeout! Retry due to validate flag")
-                return self.workshop_update(
-                    app_id, workshop_id, install_dir, validate, n_tries-1
-                )
-            elif e.returncode == 10:
-                raise SteamCMDDownloadException(
-                    """
-                    SteamCMD was not able to complete this download due to a
-                    download timeout. Please add the Validate flag in order to
-                    keep retrying this download."""
-                )
+                if _validate:
+                    self._print_log("Download timeout! Retry due to validate flag")
+                    return self.workshop_update(
+                        app_id, workshop_id, install_dir, validate, n_tries-1
+                    )
+                else:
+                    raise SteamCMDDownloadException(
+                        """
+                        SteamCMD was not able to complete this download due to a
+                        download timeout. Please add the Validate flag in order to
+                        keep retrying this download."""
+                    )
+            # SteamCMD sometimes crashes when timing out downloads, due to
+            # an assert checking that the download actually finished.
+            # If this happens, retry if the validate flag is set like above.
+            elif e.returncode == 134 and _validate:
+                if _validate:
+                    self._print_log("SteamCMD errored! Retry due to validate flag")
+                    return self.workshop_update(
+                        app_id, workshop_id, install_dir, validate, n_tries - 1
+                    )
+                else:
+                    raise SteamCMDDownloadException(
+                        """
+                        SteamCMD was not able to complete this download due to a
+                        SteamCMD error. Please add the Validate flag in order to
+                        keep retrying this download."""
+                    )
             raise SteamCMDException(
                 """Steamcmd was unable to run. exit code was {}
                 """.format(e.returncode)
