@@ -293,7 +293,7 @@ class SteamCMD():
             # SteamCMD has a habit of timing out large downloads, so if the
             # Validate flag is set, retry on timeout for the remainder of
             # n_tries.
-            if e.returncode == 10 and _validate:
+            if e.returncode == 10:
                 if _validate:
                     self._print_log("Download timeout! Retry due to validate flag")
                     return self.workshop_update(
@@ -309,7 +309,7 @@ class SteamCMD():
             # SteamCMD sometimes crashes when timing out downloads, due to
             # an assert checking that the download actually finished.
             # If this happens, retry if the validate flag is set like above.
-            elif e.returncode == 134 and _validate:
+            elif e.returncode == 134:
                 if _validate:
                     self._print_log("SteamCMD errored! Retry due to validate flag")
                     return self.workshop_update(
