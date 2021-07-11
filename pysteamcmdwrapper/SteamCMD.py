@@ -11,18 +11,18 @@ from getpass import getpass
 package_links = {
     "Windows": {
         "url": "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip",
-        "extention": ".exe",
-        "d_extention": ".zip"
+        "extension": ".exe",
+        "d_extension": ".zip"
     },
     "Linux": {
         "url": "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz",
-        "extention": ".sh",
-        "d_extention": ".tar.gz"
+        "extension": ".sh",
+        "d_extension": ".tar.gz"
     }
 }
 
 
-class SteamCMD():
+class SteamCMD:
     """
     Wrapper for SteamCMD
     Will install from source depending on OS.
@@ -45,20 +45,18 @@ class SteamCMD():
 
     def _prepare_installation(self):
         """
-        Sets internal configuration accoring to parameters and OS
+        Sets internal configuration according to parameters and OS
         """
 
         self.platform = platform.system()
         if self.platform not in ["Windows", "Linux"]:
-            raise SteamCMDException("""
-            Non supported operatingsystem. Expected Windows or Linux, got {}
-            """.format(self.platform))
+            raise SteamCMDException(f"Non supported operating system. Expected Windows or Linux, got {self.platform}")
 
         self.steamcmd_url = package_links[self.platform]["url"]
-        self.zip = "steamcmd" + package_links[self.platform]["d_extention"]
+        self.zip = "steamcmd" + package_links[self.platform]["d_extension"]
         self.exe = os.path.join(
             self._installation_path,
-            "steamcmd" + package_links[self.platform]["extention"]
+            "steamcmd" + package_links[self.platform]["extension"]
         )
 
     def _download(self):
@@ -74,36 +72,30 @@ class SteamCMD():
                 f.write(data)
             return data
         except Exception as e:
-            raise SteamCMDException(
-                "An unknown exception occured during downloading. {}".format(e)
-            )
+            raise SteamCMDException(f"An unknown exception occurred during downloading. {e}")
 
     def _extract_steamcmd(self):
         """
         Internal method for extracting downloaded zip file. Works on both
         windows and linux.
-
-        :return: location of extracted folder
         """
-        ext = ""
         if self.platform == 'Windows':
             with zipfile.ZipFile(self.zip, 'r') as f:
-                ext = f.extractall(self._installation_path)
+                f.extractall(self._installation_path)
 
         elif self.platform == 'Linux':
             import tarfile
             with tarfile.open(self.zip, 'r:gz') as f:
-                ext = f.extractall(self._installation_path)
+                f.extractall(self._installation_path)
 
         else:
             # This should never happen, but let's just throw it just in case.
             raise SteamCMDException(
                 'The operating system is not supported.'
-                'Expected Linux or Windows, received: {}'.format(self.platform)
+                f'Expected Linux or Windows, received: {self.platform}'
             )
 
         os.remove(self.zip)
-        return ext
 
     def _print_log(self, *message):
         """
@@ -120,7 +112,7 @@ class SteamCMD():
             print(msg)
         print("")
 
-    def install(self, force=False):
+    def install(self, force: bool = False):
         """
         Installs steamcmd if it is not already installed to self.install_path.
 
@@ -149,12 +141,11 @@ class SteamCMD():
                     "It should be fine nevertheless")
                 return
             else:
-                raise SteamCMDInstallException(
-                    "Failed to install, check error code {}".format(e.returncode))
+                raise SteamCMDInstallException(f"Failed to install, check error code {e.returncode}")
 
         return
 
-    def login(self, uname=None, passw=None):
+    def login(self, uname: str = None, passw: str = None):
         """
         Login function in order to do a persistent login on the steam servers.
         Prompts users for their credentials and spawns a child process.
@@ -166,57 +157,32 @@ class SteamCMD():
         self._uname = uname if uname else input("Please enter steam username: ")
         self._passw = passw if passw else getpass("Please enter steam password: ")
 
-        params = (
-            self.exe,
-            "+login {} {}".format(self._uname, self._passw),
-            "+quit",
-        )
+        sc = SteamCMD_command()
+        return self.execute(sc)
 
-        try:
-            return subprocess.check_call(params)
-        except subprocess.CalledProcessError:
-            raise SteamCMDException("Steamcmd was unable to run.")
-
-    def app_update(self, app_id, install_dir=None, validate=None, beta=None, betapassword=None):
+    def app_update(self, app_id: int, install_dir: str = None, validate: bool = None, beta: str = None,
+                   betapassword: str = None):
         """
         Installer function for apps.
 
         :param app_id: The Steam ID for the app you want to install
         :param install_dir: Optional custom installation directory.
-        :param validate: Optional parameter for validation. Turn this on
-        when redownloading something
+        :param validate: Optional parameter for validation. Turn this on when updating something.
         :param beta: Optional parameter for running a beta branch.
         :param betapassword: Optional parameter for entering beta password.
-        :return: Status code of child process
+        :return: Status code of child process.
         """
-        # TODO: Validate seems to be broken. Check why
-        # TODO: Note: Non validated downloads will sometimes return error code 8. Just leave validate on?
-        _validate = 'validate' if validate else ""
-        _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else ""
-        _beta = '-beta {}'.format(beta) if beta else ""
-        _betapassword = '-betapassword {}'.format(betapassword) if betapassword else ""
-
-        params = (
-            self.exe,
-            "+login {} {}".format(self._uname, self._passw),
-            "{}".format(_install_dir),
-            "+app_update {}".format(app_id),
-            "{}".format(_beta),
-            "{}".format(_betapassword),
-            "{}".format(_validate),
-            "+quit",
-        )
-        self._print_log("Parameters used:", " ".join(e for e in params if e))
+        sc = SteamCMD_command()
+        if install_dir:
+            sc.force_install_dir(install_dir)
+        sc.app_update(app_id, validate, beta, betapassword)
         self._print_log(
-            "Downloading item {}".format(app_id),
-            "into {} with validate set to {}".format(_install_dir, validate))
-        try:
-            return subprocess.check_call(" ".join(e for e in params if e), shell=True)
-        except subprocess.CalledProcessError as e:
-            self._print_log(e)
-            raise SteamCMDException("Steamcmd was unable to run.")
+            f"Downloading item {app_id}",
+            f"into {install_dir} with validate set to {validate}")
+        return self.execute(sc)
 
-    def workshop_update(self, app_id, workshop_id, install_dir=None, validate=None, n_tries=5):
+    def workshop_update(self, app_id: int, workshop_id: int, install_dir: str = None, validate: bool = None,
+                        n_tries: int = 5):
         """
         Installer function for workshop content. Retries multiple times on timeout due to valves'
         stupid timeout on large downloads.
@@ -224,77 +190,26 @@ class SteamCMD():
         :param app_id: The parent application ID
         :param workshop_id: The ID for workshop content. Can be found in the url.
         :param install_dir: Optional custom installation directory.
-        :param validate: Optional parameter for validation. Turn this on when redownloading something
+        :param validate: Optional parameter for validation. Turn this on when updating something.
         :param n_tries: Counter for how many redownloads it can make before officially timing out.
-
-        :return: Status code of child process
+        :return: Status code of child process.
         """
-        # TODO: Validate seems to be broken. Check why
-        # TODO: Note: Non validated downloads will sometimes return error code 8. Just leave validate on?
-        if n_tries == 0:
-            raise SteamCMDDownloadException(
-                """Error downloading file, max number of timeout tries exceeded!
-                Consider increasing the n_tries parameter if the download is
-                particularly large"""
-            )
-        _validate = 'validate' if validate else ""
-        _install_dir = '+force_install_dir "{}"'.format(install_dir) if install_dir else ""
 
-        params = (
-            self.exe,
-            "+login {} {}".format(self._uname, self._passw),
-            "{}".format(_install_dir),
-            "+workshop_download_item {} {}".format(app_id, workshop_id),
-            "{}".format(_validate),
-            "+quit",
-        )
-        self._print_log("Parameters used:", " ".join(e for e in params if e))
-        self._print_log(
-            "Downloading {}".format(workshop_id),
-            "On try {}".format(n_tries)
-        )
-        try:
-            return subprocess.check_call(" ".join(e for e in params if e), shell=True)
+        sc = SteamCMD_command()
+        if install_dir:
+            sc.force_install_dir(install_dir)
+        sc.workshop_download_item(app_id, workshop_id, validate)
+        return self.execute(sc, n_tries)
 
-        except subprocess.CalledProcessError as e:
-            # SteamCMD has a habit of timing out large downloads, so if the
-            # Validate flag is set, retry on timeout for the remainder of
-            # n_tries.
-            if e.returncode == 10:
-                if _validate:
-                    self._print_log("Download timeout! Retry due to validate flag")
-                    return self.workshop_update(
-                        app_id, workshop_id, install_dir, validate, n_tries - 1
-                    )
-                else:
-                    raise SteamCMDDownloadException(
-                        """
-                        SteamCMD was not able to complete this download due to a
-                        download timeout. Please add the Validate flag in order to
-                        keep retrying this download."""
-                    )
-            # SteamCMD sometimes crashes when timing out downloads, due to
-            # an assert checking that the download actually finished.
-            # If this happens, retry if the validate flag is set like above.
-            elif e.returncode == 134:
-                if _validate:
-                    self._print_log("SteamCMD errored! Retry due to validate flag")
-                    return self.workshop_update(
-                        app_id, workshop_id, install_dir, validate, n_tries - 1
-                    )
-                else:
-                    raise SteamCMDDownloadException(
-                        """
-                        SteamCMD was not able to complete this download due to a
-                        SteamCMD error. Please add the Validate flag in order to
-                        keep retrying this download."""
-                    )
-            raise SteamCMDException(
-                """Steamcmd was unable to run. exit code was {}
-                """.format(e.returncode)
-            )
+    def execute(self, cmd: SteamCMD_command, n_tries: int = 1):
+        """
+        Executes a SteamCMD_command, with added actions occurring sequentially.
+        May retry multiple times on timeout due to valves' stupid timeout on large downloads.
 
-    def execute(self, cmd: SteamCMD_command, n_tries: int = 5):
+        :param cmd: Sequence of commands to execute
+        :param n_tries: Number of times the command will be tried.
+        :return: Status code of child process.
+        """
         if n_tries == 0:
             raise SteamCMDDownloadException(
                 """Error executing command, max number of timeout tries exceeded!
@@ -304,7 +219,7 @@ class SteamCMD():
 
         params = (
             self.exe,
-            "+login {} {}".format(self._uname, self._passw),
+            f"+login {self._uname} {self._passw}",
             cmd.get_cmd(),
             "+quit",
         )
@@ -315,13 +230,13 @@ class SteamCMD():
         except subprocess.CalledProcessError as e:
             # SteamCMD has a habit of timing out large downloads, so  retry on timeout for the remainder of n_tries.
             if e.returncode == 10:
-                self._print_log("Download timeout! Retrying...")
+                self._print_log(f"Download timeout! Tries remaining: {n_tries}. Retrying...")
                 return self.execute(cmd, n_tries - 1)
             # SteamCMD sometimes crashes when timing out downloads, due to
             # an assert checking that the download actually finished.
             # If this happens, retry.
             elif e.returncode == 134:
-                self._print_log("SteamCMD errored! Retrying...")
+                self._print_log(f"SteamCMD errored! Tries remaining: {n_tries}. Retrying...")
                 return self.execute(cmd, n_tries - 1)
 
-            raise SteamCMDException("Steamcmd was unable to run. exit code was {}".format(e.returncode))
+            raise SteamCMDException(f"Steamcmd was unable to run. exit code was {e.returncode}")

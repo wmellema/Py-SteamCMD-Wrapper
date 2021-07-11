@@ -15,7 +15,7 @@ class SteamCMDException(Exception):
 
 class SteamCMDDownloadException(SteamCMDException):
     """
-    Class for handeling download exceptions
+    Class for handling download exceptions
     """
 
     def __init__(self, *args, **kwargs):
@@ -24,7 +24,7 @@ class SteamCMDDownloadException(SteamCMDException):
 
 class SteamCMDInstallException(SteamCMDException):
     """
-    Class for handeling installation exceptions
+    Class for handling installation exceptions
     """
     def __init__(self, *args, **kwargs):
         super(SteamCMDInstallException, self).__init__(*args, **kwargs)
