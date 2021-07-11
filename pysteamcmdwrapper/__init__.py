@@ -3,7 +3,7 @@
 __author__ = "Wouter Mellema"
 __copyright__ = "Copyright 2020"
 __licence__ = "GNU GPLv3"
-__version__ = "1.0.5"
+__version__ = "1.1.0"
 __maintainer__ = "Wouter Mellema"
 __status__ = "Development"
 
