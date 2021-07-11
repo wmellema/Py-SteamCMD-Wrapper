@@ -8,6 +8,9 @@ class SteamCMD_command:
     """
     _commands = []
 
+    def __init__(self):
+        self._commands = []
+
     def force_install_dir(self, install_dir: str):
         """
         Sets the install directory for following app_update and workshop_download_item commands

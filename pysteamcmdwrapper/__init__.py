@@ -8,4 +8,5 @@ __maintainer__ = "Wouter Mellema"
 __status__ = "Development"
 
 from pysteamcmdwrapper.SteamCMD import SteamCMD
+from pysteamcmdwrapper.SteamCMD_command import SteamCMD_command
 from pysteamcmdwrapper.exceptions import SteamCMDException, SteamCMDDownloadException, SteamCMDInstallException
