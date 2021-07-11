@@ -293,3 +293,35 @@ class SteamCMD():
                 """Steamcmd was unable to run. exit code was {}
                 """.format(e.returncode)
             )
+
+    def execute(self, cmd: SteamCMD_command, n_tries: int = 5):
+        if n_tries == 0:
+            raise SteamCMDDownloadException(
+                """Error executing command, max number of timeout tries exceeded!
+                Consider increasing the n_tries parameter if the download is
+                particularly large"""
+            )
+
+        params = (
+            self.exe,
+            "+login {} {}".format(self._uname, self._passw),
+            cmd.get_cmd(),
+            "+quit",
+        )
+        self._print_log("Parameters used:", " ".join(params))
+        try:
+            return subprocess.check_call(" ".join(params), shell=True)
+
+        except subprocess.CalledProcessError as e:
+            # SteamCMD has a habit of timing out large downloads, so  retry on timeout for the remainder of n_tries.
+            if e.returncode == 10:
+                self._print_log("Download timeout! Retrying...")
+                return self.execute(cmd, n_tries - 1)
+            # SteamCMD sometimes crashes when timing out downloads, due to
+            # an assert checking that the download actually finished.
+            # If this happens, retry.
+            elif e.returncode == 134:
+                self._print_log("SteamCMD errored! Retrying...")
+                return self.execute(cmd, n_tries - 1)
+
+            raise SteamCMDException("Steamcmd was unable to run. exit code was {}".format(e.returncode))
