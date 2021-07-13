@@ -56,6 +56,7 @@ def testGameDownload():
         shutil.rmtree(_inst_dir, ignore_errors=True)
         shutil.rmtree("tmp_game", ignore_errors=True)
 
+
 def test_workshop_download():
     _inst_dir = inst_dir+"4"
     try:
@@ -66,7 +67,7 @@ def test_workshop_download():
         s.install()
         # s.app_update(1840, os.path.join(os.getcwd(), "tmp_csgo"), validate=True)
         # return
-        s.workshop_update(107410,450814997, os.path.join(os.getcwd(),"tmp_armamod/"), validate=True)
+        s.workshop_update(107410, 450814997, os.path.join(os.getcwd(), "tmp_armamod/"), validate=True)
         assert os.path.isfile(os.path.join(
                 os.getcwd(),
                 "tmp_armamod",
@@ -77,6 +78,9 @@ def test_workshop_download():
                 "450814997",
                 "README.md"
                 ))
+    except AssertionError as e:
+        print(os.system("tree "+os.getcwd()))
+        raise e
     except Exception as e:
         if os.path.isdir(_inst_dir):
             shutil.rmtree(_inst_dir, ignore_errors=True)
@@ -85,6 +89,7 @@ def test_workshop_download():
     finally:
         shutil.rmtree(_inst_dir, ignore_errors=True)
         shutil.rmtree("tmp_csgo", ignore_errors=True)
+
 
 if __name__ == "__main__":
     test_workshop_download()
