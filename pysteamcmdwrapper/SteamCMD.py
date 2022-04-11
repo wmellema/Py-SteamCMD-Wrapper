@@ -97,7 +97,8 @@ class SteamCMD:
 
         os.remove(self.zip)
 
-    def _print_log(self, *message):
+    @staticmethod
+    def _print_log(*message):
         """
         Small helper function for printing log entries.
         Helps with output of subprocess.check_call not always having newlines
