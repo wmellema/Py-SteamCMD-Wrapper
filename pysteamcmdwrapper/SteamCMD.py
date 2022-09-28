@@ -36,7 +36,7 @@ class SteamCMD:
         self._installation_path = installation_path
 
         if not os.path.isdir(self._installation_path):
-            raise SteamCMDInstallException("""
+            raise SteamCMDInstallException(message="""
             No valid directory found at {}.
             Please make sure that the directory is correct.
             """.format(self._installation_path))
@@ -50,7 +50,7 @@ class SteamCMD:
 
         self.platform = platform.system()
         if self.platform not in ["Windows", "Linux"]:
-            raise SteamCMDException(f"Non supported operating system. Expected Windows or Linux, got {self.platform}")
+            raise SteamCMDException(message=f"Non supported operating system. Expected Windows or Linux, got {self.platform}")
 
         self.steamcmd_url = package_links[self.platform]["url"]
         self.zip = "steamcmd" + package_links[self.platform]["d_extension"]
@@ -65,14 +65,17 @@ class SteamCMD:
 
         :return: downloaded data for debug purposes
         """
+
         try:
+            if not self.steamcmd_url.lower().startswith("http"):
+                raise ValueError from None
             resp = urllib.request.urlopen(self.steamcmd_url)
             data = resp.read()
             with open(self.zip, "wb") as f:
                 f.write(data)
             return data
         except Exception as e:
-            raise SteamCMDException(f"An unknown exception occurred during downloading. {e}")
+            raise SteamCMDException(message=f"An unknown exception occurred during downloading. {e}")
 
     def _extract_steamcmd(self):
         """
@@ -90,7 +93,7 @@ class SteamCMD:
 
         else:
             # This should never happen, but let's just throw it just in case.
-            raise SteamCMDException(
+            raise SteamCMDException(message=
                 'The operating system is not supported.'
                 f'Expected Linux or Windows, received: {self.platform}'
             )
@@ -125,7 +128,7 @@ class SteamCMD:
             self._extract_steamcmd()
 
         else:
-            raise SteamCMDException(
+            raise SteamCMDException(message=
                 'Steamcmd is already installed. Reinstall is not necessary.'
                 'Use force=True to override.'
             )
@@ -141,7 +144,7 @@ class SteamCMD:
                     "It should be fine nevertheless")
                 return
             else:
-                raise SteamCMDInstallException(f"Failed to install, check error code {e.returncode}")
+                raise SteamCMDInstallException(message=f"Failed to install, check error code {e.returncode}")
 
         return
 
@@ -211,7 +214,7 @@ class SteamCMD:
         :return: Status code of child process.
         """
         if n_tries == 0:
-            raise SteamCMDDownloadException(
+            raise SteamCMDDownloadException(message=
                 """Error executing command, max number of timeout tries exceeded!
                 Consider increasing the n_tries parameter if the download is
                 particularly large"""
@@ -239,4 +242,4 @@ class SteamCMD:
                 self._print_log(f"SteamCMD errored! Tries remaining: {n_tries}. Retrying...")
                 return self.execute(cmd, n_tries - 1)
 
-            raise SteamCMDException(f"Steamcmd was unable to run. exit code was {e.returncode}")
+            raise SteamCMDException(message=f"Steamcmd was unable to run. exit code was {e.returncode}")

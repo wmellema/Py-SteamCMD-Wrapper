@@ -2,7 +2,7 @@ class SteamCMDException(Exception):
     """
     Base exception for steamcmdwrapper
     """
-    def __init__(self, message=None, *args, **kwargs):
+    def __init__(self, *args, message=None, **kwargs):
         self.message = message
         super(SteamCMDException, self).__init__(*args, **kwargs)
 
