@@ -36,10 +36,9 @@ class SteamCMD:
         self._installation_path = installation_path
 
         if not os.path.isdir(self._installation_path):
-            raise SteamCMDInstallException(message="""
-            No valid directory found at {}.
-            Please make sure that the directory is correct.
-            """.format(self._installation_path))
+            raise SteamCMDInstallException(message=
+                f'No valid directory found at {self._installation_path}'
+                'Please make sure that the directory is correct.')
 
         self._prepare_installation()
 
@@ -67,13 +66,16 @@ class SteamCMD:
         """
 
         try:
-            if not self.steamcmd_url.lower().startswith("http"):
+            if self.steamcmd_url.lower().startswith("http"):
+                req = urllib.request.Request(self.steamcmd_url)
+            else:
                 raise ValueError from None
-            resp = urllib.request.urlopen(self.steamcmd_url)
-            data = resp.read()
-            with open(self.zip, "wb") as f:
-                f.write(data)
-            return data
+            with urllib.request.urlopen(req) as resp:
+
+                data = resp.read()
+                with open(self.zip, "wb") as f:
+                    f.write(data)
+                return data
         except Exception as e:
             raise SteamCMDException(message=f"An unknown exception occurred during downloading. {e}")
 

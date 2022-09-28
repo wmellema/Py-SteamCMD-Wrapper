@@ -1,4 +1,4 @@
-from pysteamcmdwrapper import SteamCMD, SteamCMD_command
+from pysteamcmdwrapper import SteamCMD_command
 
 def testWorkshopDownloadCommand():
     sc = SteamCMD_command()
